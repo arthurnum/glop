@@ -172,14 +172,12 @@ void build_glop_data()
     glGenBuffers(1, &triangleVBO);
     glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
     glBufferData(GL_ARRAY_BUFFER, size*sizeof(vertex_t), super_vertices, GL_STATIC_DRAW);
-    glEnableClientState(GL_VERTEX_ARRAY);
-    glVertexPointer(3, GL_FLOAT, 0, NULL);   
+    glVertexPointer(3, GL_FLOAT, 0, NULL);
 
 
     glGenBuffers(1, &normalsVOB);
     glBindBuffer(GL_ARRAY_BUFFER, normalsVOB);
     glBufferData(GL_ARRAY_BUFFER, size*sizeof(vertex_t), super_normals, GL_STATIC_DRAW);
-    glEnableClientState(GL_NORMAL_ARRAY);
     glNormalPointer(GL_FLOAT, 0, 0);
 
 
@@ -209,7 +207,6 @@ void build_glop_data()
     glGenBuffers(1, &texture_coordVBO);
     glBindBuffer(GL_ARRAY_BUFFER, texture_coordVBO);
     glBufferData(GL_ARRAY_BUFFER, (D-1)*(D-1)*sizeof(quad_texture_uv), texcoords , GL_STATIC_DRAW);
-    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     glTexCoordPointer(2, GL_FLOAT, 0, 0);
 
 
@@ -272,19 +269,21 @@ float calc_viewer_y(float x, float z)
 void display()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT); // Clear color and depth buffers
+    
     glMatrixMode(GL_MODELVIEW);     // To operate on model-view matrix
-
     glLoadIdentity();
-
     /* viewing transformation  */
     gluLookAt(viewer_x, viewer_y + 0.5f, viewer_z, lookat_x, -15.0f, lookat_z, 0.0f, 1.0f, 0.0f);
+
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
     glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
     glBindBuffer(GL_ARRAY_BUFFER, normalsVOB);
     glBindBuffer(GL_ARRAY_BUFFER, texture_coordVBO);
 
-
-    glEnable(GL_TEXTURE_2D); 
+    glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, textureID);
     glDrawArrays(GL_TRIANGLES, 0, 63*63*6);
     glDisable(GL_TEXTURE_2D);
@@ -298,7 +297,7 @@ void display()
     glMatrixMode(GL_MODELVIEW);     // To operate on model-view matrix
     glLoadIdentity();
     glRasterPos2i(50, 50);
-    glutBitmapString(GLUT_BITMAP_HELVETICA_18, "GLOP");
+    glutBitmapString(GLUT_BITMAP_HELVETICA_18, "GLOP@");
 
     glMatrixMode(GL_PROJECTION);
     glPopMatrix();
@@ -416,8 +415,9 @@ void load_texture()
 int main (int argc, char * argv[])
 {
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA|GLUT_DEPTH); 
-   
+    glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA|GLUT_DEPTH);
+    glutInitContextVersion(3, 0);
+
     glutInitWindowSize(800, 600);
     glutCreateWindow("YO!");
 
@@ -454,7 +454,7 @@ int main (int argc, char * argv[])
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_DEPTH_TEST);
-   
+
     glutMouseFunc(mouseHand);
 
     viewer_x = 3.0f;
@@ -464,7 +464,6 @@ int main (int argc, char * argv[])
     lookat_x = sin(angleX / 180.0 * PI) * 20;
     lookat_z = cos(angleX / 180.0 * PI) * (-20);
 
-    reshape(800, 600);
     glutMainLoop();
 
     return 0;
