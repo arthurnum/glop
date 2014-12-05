@@ -280,12 +280,9 @@ void display()
     glMatrixMode(GL_MODELVIEW);     // To operate on model-view matrix
 
     glLoadIdentity();
-           
-    // glTranslatef(-8.0f, 0.0f, 0.0f);  // Move left and into the screen
 
     /* viewing transformation  */
-    // gluLookAt(viewer_x, viewer_y + 0.3f, viewer_z + 1.0f, lookat_x, -15.0f, lookat_z, 0.0f, 1.0f, 0.0f);
-    gluLookAt(5.0f, 2.0f, 0.0f, 5.0f, 0.0f, -3.0f, 0.0f, 1.0f, 0.0f);
+    gluLookAt(viewer_x, viewer_y + 0.5f, viewer_z + 1.0f, lookat_x, -15.0f, lookat_z, 0.0f, 1.0f, 0.0f);
 
     glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
     glBindBuffer(GL_ARRAY_BUFFER, normalsVOB);
@@ -297,42 +294,22 @@ void display()
     glDrawArrays(GL_TRIANGLES, 0, 63*63*6);
     glDisable(GL_TEXTURE_2D);
 
-        GLint viewport[4];
-        GLdouble modelview[16];
-        GLdouble projection[16];
-        GLfloat winX, winY, winZ;
-     
-        glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
-        glGetDoublev( GL_PROJECTION_MATRIX, projection );
-        glGetIntegerv( GL_VIEWPORT, viewport );
-     
-        winX = (float)300;
-        winY = (float)viewport[3] - (float)125;
-        glReadPixels( (int)winX, (int)(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
-     
-        gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
-        glRasterPos3f(posX,posY,posZ);
 
-glMatrixMode (GL_PROJECTION); 
-glPushMatrix();
-glLoadIdentity (); gluOrtho2D (0, 800, 0, 600);
-glMatrixMode(GL_MODELVIEW);     // To operate on model-view matrix
-
+    glMatrixMode(GL_PROJECTION);
+    glPushMatrix();
     glLoadIdentity();
-glRasterPos2i(50, 50);
-        glutBitmapString(GLUT_BITMAP_HELVETICA_18, "GLOP");
+    gluOrtho2D(0, 800, 0, 600);
 
-glMatrixMode (GL_PROJECTION); glPopMatrix();
+    glMatrixMode(GL_MODELVIEW);     // To operate on model-view matrix
+    glLoadIdentity();
+    glRasterPos2i(50, 50);
+    glutBitmapString(GLUT_BITMAP_HELVETICA_18, "GLOP");
 
+    glMatrixMode(GL_PROJECTION);
+    glPopMatrix();
 
-    // glPushMatrix();
-    // glTranslatef(posX, posY, posZ);
-    // glutSolidSphere(0.10, 16, 16);
-
-    // glPopMatrix();
     glutSwapBuffers();
 }
-
 
 
 void reshape(int w, int h)
@@ -419,6 +396,8 @@ void mouseHand(int button, int state, int x, int y)
         gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
         printf("%f %f %f\n", posX, posY, posZ);
     }
+
+    glutPostRedisplay();
 }
 
 
@@ -449,12 +428,12 @@ int main (int argc, char * argv[])
 
 
     GLenum err = glewInit();
-if (GLEW_OK != err)
-{
-  /* Problem: glewInit failed, something is seriously wrong. */
-  fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
-}
-fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
+    if (GLEW_OK != err)
+    {
+      /* Problem: glewInit failed, something is seriously wrong. */
+      fprintf(stderr, "Error: %s\n", glewGetErrorString(err));
+    }
+    fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
 
     glutSpecialFunc(escapeApp);
     glutMouseWheelFunc(wheelHand);
@@ -490,7 +469,7 @@ fprintf(stdout, "Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
     lookat_x = sin(angleX / 180.0 * PI) * 20;
     lookat_z = cos(angleX / 180.0 * PI) * (-20);
 
-
+    reshape(800, 600);
     glutMainLoop();
 
     return 0;
