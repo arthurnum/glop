@@ -10,13 +10,8 @@
 #include "headers/glop_math.h"
 
 
-int wheelValue = 0;
-int wheelProc = 0;
-
 bmp_image Hmap;
 GLuint textureID;
-
-GLdouble posX, posY, posZ;
 
 GLuint triangleVBO;
 GLuint normalsVOB;
@@ -282,7 +277,7 @@ void display()
     glLoadIdentity();
 
     /* viewing transformation  */
-    gluLookAt(viewer_x, viewer_y + 0.5f, viewer_z + 1.0f, lookat_x, -15.0f, lookat_z, 0.0f, 1.0f, 0.0f);
+    gluLookAt(viewer_x, viewer_y + 0.5f, viewer_z, lookat_x, -15.0f, lookat_z, 0.0f, 1.0f, 0.0f);
 
     glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
     glBindBuffer(GL_ARRAY_BUFFER, normalsVOB);
@@ -371,13 +366,13 @@ void escapeApp(int key, int x, int y)
 
 void wheelHand(int wheel, int direction, int x, int y)
 {
-    wheelValue += direction;
-    wheelProc = 1;
+    // put some logic here
 }
 
 
 void mouseHand(int button, int state, int x, int y)
 {
+    GLdouble posX, posY, posZ;
     if (state == GLUT_DOWN)
     {
         GLint viewport[4];
