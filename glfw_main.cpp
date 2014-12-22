@@ -1,3 +1,4 @@
+#define GLFW_DLL
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -8,6 +9,8 @@
 GLuint textureID;
 GLOPSphere* sphere1;
 GLOPSphere* sphere2;
+
+unsigned int _cursor_pos_callback_counter = 0;
 
 
 void draw()
@@ -129,14 +132,19 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
 
 void cursor_pos_callback(GLFWwindow* window, double x, double y)
 {
-    picking_draw();
-    unsigned char pixel[3];
-    GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT, viewport);
-    glReadPixels(x, viewport[3] - y, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
-    sphere1->selected = 0;
-    if (pixel[0] == 10 && pixel[1] == 10 && pixel[2] == 10) { sphere1->selected = 1; }
-    if (pixel[0] == 20 && pixel[1] == 20 && pixel[2] == 20) { sphere2->selected = 1; }
+    if (_cursor_pos_callback_counter % 4 == 0)
+	{
+        picking_draw();
+		unsigned char pixel[3];
+        GLint viewport[4];
+        glGetIntegerv(GL_VIEWPORT, viewport);
+		glReadPixels(x, viewport[3] - y, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
+		sphere1->selected = 0;
+		if (pixel[0] == 10 && pixel[1] == 10 && pixel[2] == 10) { sphere1->selected = 1; }
+		if (pixel[0] == 20 && pixel[1] == 20 && pixel[2] == 20) { sphere2->selected = 1; }
+	}
+	_cursor_pos_callback_counter++;
+	if (_cursor_pos_callback_counter > 65000) _cursor_pos_callback_counter = 0;
 }
 
 
@@ -151,7 +159,7 @@ int main(void)
     /* Create a windowed mode window and its OpenGL context */
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
-    glfwWindowHint(GLFW_SAMPLES, 1);
+    glfwWindowHint(GLFW_SAMPLES, 2);
     window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
     if (!window)
     {
@@ -195,8 +203,8 @@ int main(void)
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
 
-        /* Poll for and process events */
-        glfwPollEvents();
+        /* Wait for and process events */
+		glfwWaitEvents();
     }
 
     glfwTerminate();
