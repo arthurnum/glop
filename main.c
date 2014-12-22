@@ -283,6 +283,47 @@ void display()
     glBindBuffer(GL_ARRAY_BUFFER, normalsVOB);
     glBindBuffer(GL_ARRAY_BUFFER, texture_coordVBO);
 
+    // SHADER STATE
+    // GLuint shader, program;
+    // GLint compiled, linked;
+    // const GLchar* shaderSrc[] = {
+    //     "void main()"
+    //     "{"
+    //         "gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;"
+    //     "}"
+    // };
+    // shader = glCreateShader(GL_VERTEX_SHADER);
+    // glShaderSource(shader, 1, shaderSrc, NULL);
+    // glCompileShader(shader);
+    // glGetShaderiv(shader, GL_COMPILE_STATUS, &compiled );
+    // if (!compiled) {
+    //     GLint length;
+    //     GLchar* log;
+    //     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &length );
+    //     log = (GLchar*) malloc(length);
+    //     glGetShaderInfoLog(shader, length, &length, log);
+    //     fprintf(stderr, "compile log = '%s'\n", log);
+    //     free(log);
+    // }
+    // program = glCreateProgram();
+    // glAttachShader(program, shader);
+    // glLinkProgram(program);
+    // glGetProgramiv(program, GL_LINK_STATUS, &linked );
+    // if (linked) {
+    //     glUseProgram(program);
+    // } else {
+    //     GLint length;
+    //     GLchar* log;
+    //     glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length );
+    //     log = (GLchar*) malloc(length);
+    //     glGetProgramInfoLog(program, length, &length, log);
+    //     fprintf(stderr, "link log = '%s'\n", log);
+    //     free(log);
+    // }
+
+    // #####################
+
+
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, textureID);
     glDrawArrays(GL_TRIANGLES, 0, 63*63*6);
@@ -372,23 +413,34 @@ void wheelHand(int wheel, int direction, int x, int y)
 void mouseHand(int button, int state, int x, int y)
 {
     GLdouble posX, posY, posZ;
+    GLdouble posX1, posY1, posZ1;
+    GLdouble posX2, posY2, posZ2;
+    GLdouble rayX, rayY, rayZ;
     if (state == GLUT_DOWN)
     {
         GLint viewport[4];
         GLdouble modelview[16];
         GLdouble projection[16];
         GLfloat winX, winY, winZ;
-     
+
         glGetDoublev( GL_MODELVIEW_MATRIX, modelview );
         glGetDoublev( GL_PROJECTION_MATRIX, projection );
         glGetIntegerv( GL_VIEWPORT, viewport );
-     
+
         winX = (float)x;
         winY = (float)viewport[3] - (float)y;
         glReadPixels( x, (int)(winY), 1, 1, GL_DEPTH_COMPONENT, GL_FLOAT, &winZ );
-     
+
         gluUnProject( winX, winY, winZ, modelview, projection, viewport, &posX, &posY, &posZ);
-        printf("%f %f %f\n", posX, posY, posZ);
+        printf("\nWORLD POINT: %f %f %f\n", posX, posY, posZ);
+        gluUnProject( winX, winY, 0, modelview, projection, viewport, &posX1, &posY1, &posZ1);
+        printf("RAY NEAR POINT: %f %f %f\n", posX1, posY1, posZ1);
+        gluUnProject( winX, winY, 1, modelview, projection, viewport, &posX2, &posY2, &posZ2);
+        printf("RAY FAR  POINT: %f %f %f\n", posX2, posY2, posZ2);
+        rayX = posX2 - posX1;
+        rayY = posY2 - posY1;
+        rayZ = posZ2 - posZ1;
+        printf("RAY     VECTOR: %f %f %f\n", rayX, rayY, rayZ);
     }
 
     glutPostRedisplay();
@@ -398,10 +450,10 @@ void mouseHand(int button, int state, int x, int y)
 void load_texture()
 {
     glGenTextures(1, &textureID);
-     
+
     // "Bind" the newly created texture : all future texture functions will modify this texture
     glBindTexture(GL_TEXTURE_2D, textureID);
-    
+
     bmp_image texture = load_bmp_image("terrain.bmp");
     // Give the image to OpenGL
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.width, texture.height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture.data);
@@ -415,7 +467,7 @@ void load_texture()
 int main (int argc, char * argv[])
 {
     glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA|GLUT_DEPTH);
+    glutInitDisplayMode(GLUT_DOUBLE|GLUT_RGBA|GLUT_DEPTH|GLUT_MULTISAMPLE);
     glutInitContextVersion(3, 0);
 
     glutInitWindowSize(800, 600);
@@ -446,14 +498,18 @@ int main (int argc, char * argv[])
     GLfloat light_ambient[] = { 1.0, 1.0, 1.0, 1.0 };
     GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
     GLfloat light_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat light_position[] = { 1.0, 1.0, 1.0, 0.0 };
 
     glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
     glEnable(GL_DEPTH_TEST);
+
+    glEnable(GL_MULTISAMPLE);
 
     glutMouseFunc(mouseHand);
 

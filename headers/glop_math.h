@@ -1,3 +1,4 @@
+#include <math.h>
 // This is how a vertex is specified in the base code
 typedef struct vertex_t { float x, y, z; } vertex_t;
 
