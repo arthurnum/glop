@@ -29,6 +29,8 @@ void draw()
 
     float colorAmbient[] = { 0.2f, 0.2f, 0.2f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, colorAmbient);
     float colorDiffuse[] = { 0.8f, 0.8f, 0.8f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colorDiffuse);
+    float colorSpecular[] = { 0.0f, 0.0f, 0.0f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, colorSpecular);
+    glMateriali(GL_FRONT, GL_SHININESS, 0);
 
     glEnable(GL_TEXTURE_2D);
     glBindTexture(GL_TEXTURE_2D, textureID);
@@ -39,6 +41,8 @@ void draw()
     {
         float colorAmbientGold[] = { 0.24f, 0.19f, 0.07f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, colorAmbientGold);
         float colorDiffuseGold[] = { 0.75f, 0.60f, 0.22f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colorDiffuseGold);
+        float colorSpecularGold[] = { 0.62f, 0.55f, 0.36f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, colorSpecularGold);
+        glMaterialf(GL_FRONT, GL_SHININESS, 0.4f * 128.0f);
     }
     glTranslatef(5.0f, 1.0f, -5.0f);
     sphere1->Draw();
