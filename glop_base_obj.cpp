@@ -1,5 +1,7 @@
 #include "glop_base_obj.h"
 
+unsigned char GLOPBaseObj::_Id = 0;
+
 void GLOPBaseObj::Load(const char* filename)
 {
     std::ifstream file;
@@ -108,5 +110,38 @@ void GLOPBaseObj::Draw()
     float colorSpecular[] = { 0.0f, 0.0f, 0.0f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, colorSpecular);
     glMateriali(GL_FRONT, GL_SHININESS, 0);
 
+	if (selected > 0)
+	{
+		float colorAmbientGold[] = { 0.24f, 0.19f, 0.07f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, colorAmbientGold);
+		float colorDiffuseGold[] = { 0.75f, 0.60f, 0.22f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colorDiffuseGold);
+		float colorSpecularGold[] = { 0.62f, 0.55f, 0.36f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, colorSpecularGold);
+		glMaterialf(GL_FRONT, GL_SHININESS, 0.4f * 128.0f);
+	}
+
     glDrawArrays(GL_TRIANGLES, 0, faces*3);
+}
+
+
+void GLOPBaseObj::DrawPick()
+{
+    glBindBuffer(GL_ARRAY_BUFFER, verticesVBO);
+    glVertexPointer(3, GL_FLOAT, 0, NULL);
+    glBindBuffer(GL_ARRAY_BUFFER, normalsVBO);
+    glNormalPointer(GL_FLOAT, 0, 0);
+	glColor3ub(id, id, id);
+    glDrawArrays(GL_TRIANGLES, 0, faces*3);
+}
+
+
+GLOPBaseObj::GLOPBaseObj()
+{
+	_Id++;
+	id = _Id;
+}
+
+
+void GLOPBaseObj::MouseOver(unsigned char* pixel)
+{
+	selected = 0;
+	if (pixel[0] == id && pixel[1] == id && pixel[2] == id) { selected = 1; }
 }

@@ -3,15 +3,13 @@
 #include <GLFW/glfw3.h>
 
 #include <stdio.h>
-#include "sphere.h"
 #include "glop_base_obj.h"
 #include "glop_hmap_terrain.h"
 
 
-GLOPSphere* sphere1;
-GLOPSphere* sphere2;
 GLOPBaseObj* baseObj;
 GLOPBaseObj* baseObj2;
+GLOPBaseObj* baseObj3;
 GLOPHmapTerrain* terrain;
 
 unsigned int _cursor_pos_callback_counter = 0;
@@ -24,31 +22,33 @@ void draw()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(-3.0f, 2.0f, 3.0f, 10.0f, -1.0f, -10.0f, 0.0f, 1.0f, 0.0f);
+    gluLookAt(-0.5f, 0.5f, 0.5f, 10.0f, -1.0f, -10.0f, 0.0f, 1.0f, 0.0f);
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_NORMAL_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
     terrain->Draw();
+
+	glPushMatrix();
+    glTranslatef(1.0f, 0.0f, -1.0f);
+	glScalef(0.1f, 0.1f, 0.1f);
     baseObj->Draw();
-    glTranslatef(2.0f, 0.0f, -2.0f);
+	glPopMatrix();
+
+	glPushMatrix();
+    glTranslatef(2.5f, 0.0f, -3.5f);
+	glRotatef(-60.0f, 0.0f, 1.0f, 0.0f);
+	glScalef(0.1f, 0.1f, 0.1f);
     baseObj2->Draw();
+	glPopMatrix();
 
-
-    
-
-    // if (sphere1->selected)
-    // {
-    //     float colorAmbientGold[] = { 0.24f, 0.19f, 0.07f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, colorAmbientGold);
-    //     float colorDiffuseGold[] = { 0.75f, 0.60f, 0.22f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colorDiffuseGold);
-    //     float colorSpecularGold[] = { 0.62f, 0.55f, 0.36f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, colorSpecularGold);
-    //     glMaterialf(GL_FRONT, GL_SHININESS, 0.4f * 128.0f);
-    // }
-    // glTranslatef(5.0f, 1.0f, -5.0f);
-    // sphere1->Draw();
-    // glTranslatef(2.0f, 0.0f, -2.0f);
-    // sphere2->Draw();
+	glPushMatrix();
+    glTranslatef(0.8f, 0.0f, -1.4f);
+	glRotatef(20.0f, 0.0f, 1.0f, 0.0f);
+	glScalef(0.05f, 0.05f, 0.05f);
+    baseObj3->Draw();
+	glPopMatrix();
 }
 
 
@@ -59,14 +59,27 @@ void picking_draw()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(2.0f, 2.0f, -5.0f, 10.0f, -1.0f, -10.0f, 0.0f, 1.0f, 0.0f);
+    gluLookAt(-0.5f, 0.5f, 0.5f, 10.0f, -1.0f, -10.0f, 0.0f, 1.0f, 0.0f);
 
-    glColor3ub(10, 10, 10);
-    glTranslatef(5.0f, 1.0f, -5.0f);
-    sphere1->Draw();
-    glColor3ub(20, 20, 20);
-    glTranslatef(2.0f, 0.0f, -2.0f);
-    sphere2->Draw();
+	glPushMatrix();
+    glTranslatef(1.0f, 0.0f, -1.0f);
+	glScalef(0.1f, 0.1f, 0.1f);
+    baseObj->DrawPick();
+	glPopMatrix();
+
+	glPushMatrix();
+    glTranslatef(2.5f, 0.0f, -3.5f);
+	glRotatef(-60.0f, 0.0f, 1.0f, 0.0f);
+	glScalef(0.1f, 0.1f, 0.1f);
+    baseObj2->DrawPick();
+	glPopMatrix();
+
+	glPushMatrix();
+    glTranslatef(0.8f, 0.0f, -1.4f);
+	glRotatef(20.0f, 0.0f, 1.0f, 0.0f);
+	glScalef(0.05f, 0.05f, 0.05f);
+    baseObj3->DrawPick();
+	glPopMatrix();
 }
 
 
@@ -104,8 +117,6 @@ void mouse_button_callback(GLFWwindow* window, int button, int action, int mods)
         glfwGetCursorPos(window, &x, &y);
 
         glReadPixels(x, viewport[3] - y, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
-        if (pixel[0] == 10 && pixel[1] == 10 && pixel[2] == 10) { printf("%s\n", "this is spere1"); }
-        if (pixel[0] == 20 && pixel[1] == 20 && pixel[2] == 20) { printf("%s\n", "this is spere2"); }
     }
 }
 
@@ -119,9 +130,9 @@ void cursor_pos_callback(GLFWwindow* window, double x, double y)
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
 		glReadPixels(x, viewport[3] - y, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
-		sphere1->selected = 0;
-		if (pixel[0] == 10 && pixel[1] == 10 && pixel[2] == 10) { sphere1->selected = 1; }
-		if (pixel[0] == 20 && pixel[1] == 20 && pixel[2] == 20) { sphere2->selected = 1; }
+		baseObj->MouseOver(pixel);
+		baseObj2->MouseOver(pixel);
+		baseObj3->MouseOver(pixel);
 	}
 	_cursor_pos_callback_counter++;
 	if (_cursor_pos_callback_counter > 65000) _cursor_pos_callback_counter = 0;
@@ -160,7 +171,7 @@ int main(void)
     GLfloat light_ambient[] = { 1.0, 1.0, 1.0, 1.0 };
     GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
     GLfloat light_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-    GLfloat light_position[] = { 1.0, 1.0, 1.0, 0.0 };
+    GLfloat light_position[] = { 10.0, 10.0, 10.0, 0.0 };
     glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
@@ -170,15 +181,16 @@ int main(void)
 
     glEnable(GL_DEPTH_TEST);
     glEnable(GL_MULTISAMPLE);
+	glEnable(GL_NORMALIZE);
 
-    sphere1 = new GLOPSphere();
-    sphere2 = new GLOPSphere();
     terrain = new GLOPHmapTerrain();
     terrain->Build("map128.bmp");
     baseObj = new GLOPBaseObj();
-    baseObj->Load("hex.obj");
+    baseObj->Load("wolf_mesh.obj");
     baseObj2 = new GLOPBaseObj();
-    baseObj2->Load("hex.obj");
+    baseObj2->Load("wolf_mesh.obj");
+    baseObj3 = new GLOPBaseObj();
+    baseObj3->Load("wolf_mesh.obj");
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -192,8 +204,8 @@ int main(void)
     }
 
     glfwTerminate();
-    delete sphere1;
-    delete sphere2;
     delete baseObj;
+    delete baseObj2;
+    delete baseObj3;
     return 0;
 }

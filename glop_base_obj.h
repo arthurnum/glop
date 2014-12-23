@@ -11,13 +11,18 @@ typedef struct vertex_v { float x, y, z; } vertex_v;
 class GLOPBaseObj
 {
 public:
+	GLOPBaseObj();
+	void MouseOver(unsigned char*);
     void Load(const char*);
     void Draw();
+    void DrawPick();
 private:
     GLuint verticesVBO;
     GLuint normalsVBO;
     unsigned int faces;
+    char selected;
+	unsigned char id;
+	static unsigned char _Id;
 };
-
 
 #endif
