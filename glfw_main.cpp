@@ -3,12 +3,16 @@
 #include <GLFW/glfw3.h>
 
 #include <stdio.h>
-#include "init.h"
 #include "sphere.h"
+#include "glop_base_obj.h"
+#include "glop_hmap_terrain.h"
 
-GLuint textureID;
+
 GLOPSphere* sphere1;
 GLOPSphere* sphere2;
+GLOPBaseObj* baseObj;
+GLOPBaseObj* baseObj2;
+GLOPHmapTerrain* terrain;
 
 unsigned int _cursor_pos_callback_counter = 0;
 
@@ -20,37 +24,31 @@ void draw()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(2.0f, 2.0f, -5.0f, 10.0f, -1.0f, -10.0f, 0.0f, 1.0f, 0.0f);
+    gluLookAt(-3.0f, 2.0f, 3.0f, 10.0f, -1.0f, -10.0f, 0.0f, 1.0f, 0.0f);
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_NORMAL_ARRAY);
     glEnableClientState(GL_TEXTURE_COORD_ARRAY);
 
-    glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
-    glBindBuffer(GL_ARRAY_BUFFER, normalsVOB);
-    glBindBuffer(GL_ARRAY_BUFFER, texture_coordVBO);
-
-    float colorAmbient[] = { 0.2f, 0.2f, 0.2f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, colorAmbient);
-    float colorDiffuse[] = { 0.8f, 0.8f, 0.8f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colorDiffuse);
-    float colorSpecular[] = { 0.0f, 0.0f, 0.0f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, colorSpecular);
-    glMateriali(GL_FRONT, GL_SHININESS, 0);
-
-    glEnable(GL_TEXTURE_2D);
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    glDrawArrays(GL_TRIANGLES, 0, 127*127*6);
-    glDisable(GL_TEXTURE_2D);
-
-    if (sphere1->selected)
-    {
-        float colorAmbientGold[] = { 0.24f, 0.19f, 0.07f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, colorAmbientGold);
-        float colorDiffuseGold[] = { 0.75f, 0.60f, 0.22f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colorDiffuseGold);
-        float colorSpecularGold[] = { 0.62f, 0.55f, 0.36f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, colorSpecularGold);
-        glMaterialf(GL_FRONT, GL_SHININESS, 0.4f * 128.0f);
-    }
-    glTranslatef(5.0f, 1.0f, -5.0f);
-    sphere1->Draw();
+    terrain->Draw();
+    baseObj->Draw();
     glTranslatef(2.0f, 0.0f, -2.0f);
-    sphere2->Draw();
+    baseObj2->Draw();
+
+
+    
+
+    // if (sphere1->selected)
+    // {
+    //     float colorAmbientGold[] = { 0.24f, 0.19f, 0.07f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, colorAmbientGold);
+    //     float colorDiffuseGold[] = { 0.75f, 0.60f, 0.22f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colorDiffuseGold);
+    //     float colorSpecularGold[] = { 0.62f, 0.55f, 0.36f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, colorSpecularGold);
+    //     glMaterialf(GL_FRONT, GL_SHININESS, 0.4f * 128.0f);
+    // }
+    // glTranslatef(5.0f, 1.0f, -5.0f);
+    // sphere1->Draw();
+    // glTranslatef(2.0f, 0.0f, -2.0f);
+    // sphere2->Draw();
 }
 
 
@@ -69,24 +67,6 @@ void picking_draw()
     glColor3ub(20, 20, 20);
     glTranslatef(2.0f, 0.0f, -2.0f);
     sphere2->Draw();
-}
-
-
-
-void load_texture()
-{
-    glGenTextures(1, &textureID);
-     
-    // "Bind" the newly created texture : all future texture functions will modify this texture
-    glBindTexture(GL_TEXTURE_2D, textureID);
-    
-    bmp_image texture = load_bmp_image("terrain.bmp");
-    // Give the image to OpenGL
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.width, texture.height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture.data);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
-    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
 }
 
 
@@ -176,8 +156,6 @@ int main(void)
     printf("Status: Using GLEW %s\n", glewGetString(GLEW_VERSION));
     printf("%s\n", glGetString(GL_VERSION));
     set_view_port(640, 480);
-    load_texture();
-    build_glop_data();
 
     GLfloat light_ambient[] = { 1.0, 1.0, 1.0, 1.0 };
     GLfloat light_diffuse[] = { 1.0, 1.0, 1.0, 1.0 };
@@ -195,6 +173,12 @@ int main(void)
 
     sphere1 = new GLOPSphere();
     sphere2 = new GLOPSphere();
+    terrain = new GLOPHmapTerrain();
+    terrain->Build("map128.bmp");
+    baseObj = new GLOPBaseObj();
+    baseObj->Load("hex.obj");
+    baseObj2 = new GLOPBaseObj();
+    baseObj2->Load("hex.obj");
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -210,5 +194,6 @@ int main(void)
     glfwTerminate();
     delete sphere1;
     delete sphere2;
+    delete baseObj;
     return 0;
 }

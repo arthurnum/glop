@@ -1,54 +1,15 @@
-#include "init.h"
-#include "headers/glop_math.h"
+#include "glop_hmap_terrain.h"
 
-#include <stdio.h>
-
-
-bmp_image load_bmp_image(const char* filename)
+void GLOPHmapTerrain::Build(const char* filename)
 {
-    bmp_image image;
-    // Data read from the header of the BMP file
-    unsigned char header[54]; // Each BMP file begins by a 54-bytes header
-    unsigned int dataPos;     // Position in the file where the actual data begins
-    unsigned int imageSize;   // = width*height*3
-
-    FILE *file = fopen(filename,"rb");
-    fread(header, 1, 54, file);
-    // Read ints from the byte array
-    dataPos = *(int*)&(header[0x0A]);
-    imageSize = *(int*)&(header[0x22]);
-    image.width = *(int*)&(header[0x12]);
-    image.height = *(int*)&(header[0x16]);
-    // Some BMP files are misformatted, guess missing information
-    if (imageSize==0) imageSize = image.width * image.height * 3; // 3 : one byte for each Red, Green and Blue component
-    if (dataPos==0) dataPos = 54; // The BMP header is done that way
-    // Create a buffer
-    image.data = new unsigned char [imageSize];
-
-    // Read the actual data from the file into the buffer
-    fread(image.data, 1, imageSize, file);
-    for (int i = 0; i < imageSize; i += 3)
-    {
-        unsigned char buf = image.data[i];
-        image.data[i] = image.data[i+2];
-        image.data[i+2] = buf;
-    }
-
-    //Everything is in memory now, the file can be closed
-    fclose(file);
-    return image;
-}
-
-
-void build_glop_data()
-{
+    load_texture();
     vertex_t *glop_vertices;
     vertex_t *glop_normals;
     vertex_t *super_vertices;
     vertex_t *super_normals;
 
     bmp_image Hmap;
-    Hmap = load_bmp_image("map128.bmp");
+    Hmap = load_bmp_image(filename);
     int D = Hmap.width;
     glop_vertices = new vertex_t[D*D];
 
@@ -225,4 +186,78 @@ void build_glop_data()
     delete[] glop_normals;
     delete[] super_vertices;
     delete[] super_normals;
+    printf("Create HmapTerrain with VBO %d\n", triangleVBO);
+}
+
+
+void GLOPHmapTerrain::Draw()
+{
+    glBindBuffer(GL_ARRAY_BUFFER, triangleVBO);
+    glVertexPointer(3, GL_FLOAT, 0, NULL);
+    glBindBuffer(GL_ARRAY_BUFFER, normalsVOB);
+    glNormalPointer(GL_FLOAT, 0, 0);
+    glBindBuffer(GL_ARRAY_BUFFER, texture_coordVBO);
+
+    float colorAmbient[] = { 0.2f, 0.2f, 0.2f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, colorAmbient);
+    float colorDiffuse[] = { 0.8f, 0.8f, 0.8f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, colorDiffuse);
+    float colorSpecular[] = { 0.0f, 0.0f, 0.0f, 1.0f }; glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, colorSpecular);
+    glMateriali(GL_FRONT, GL_SHININESS, 0);
+
+    glEnable(GL_TEXTURE_2D);
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    glDrawArrays(GL_TRIANGLES, 0, 127*127*6);
+    glDisable(GL_TEXTURE_2D);
+}
+
+
+bmp_image GLOPHmapTerrain::load_bmp_image(const char* filename)
+{
+    bmp_image image;
+    // Data read from the header of the BMP file
+    unsigned char header[54]; // Each BMP file begins by a 54-bytes header
+    unsigned int dataPos;     // Position in the file where the actual data begins
+    unsigned int imageSize;   // = width*height*3
+
+    FILE *file = fopen(filename,"rb");
+    fread(header, 1, 54, file);
+    // Read ints from the byte array
+    dataPos = *(int*)&(header[0x0A]);
+    imageSize = *(int*)&(header[0x22]);
+    image.width = *(int*)&(header[0x12]);
+    image.height = *(int*)&(header[0x16]);
+    // Some BMP files are misformatted, guess missing information
+    if (imageSize==0) imageSize = image.width * image.height * 3; // 3 : one byte for each Red, Green and Blue component
+    if (dataPos==0) dataPos = 54; // The BMP header is done that way
+    // Create a buffer
+    image.data = new unsigned char [imageSize];
+
+    // Read the actual data from the file into the buffer
+    fread(image.data, 1, imageSize, file);
+    for (unsigned int i = 0; i < imageSize; i += 3)
+    {
+        unsigned char buf = image.data[i];
+        image.data[i] = image.data[i+2];
+        image.data[i+2] = buf;
+    }
+
+    //Everything is in memory now, the file can be closed
+    fclose(file);
+    return image;
+}
+
+
+void GLOPHmapTerrain::load_texture()
+{
+    glGenTextures(1, &textureID);
+     
+    // "Bind" the newly created texture : all future texture functions will modify this texture
+    glBindTexture(GL_TEXTURE_2D, textureID);
+    
+    bmp_image texture = load_bmp_image("terrain.bmp");
+    // Give the image to OpenGL
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, texture.width, texture.height, 0, GL_RGB, GL_UNSIGNED_BYTE, texture.data);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+    glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
 }

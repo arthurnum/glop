@@ -1,9 +1,5 @@
-#include <math.h>
-// This is how a vertex is specified in the base code
-typedef struct vertex_t { float x, y, z; } vertex_t;
+#include "glop_math.h"
 
-// This is how a vector is specified in the base code
-// The origin is assumed to be [0,0,0]
 void normalize (vertex_t *v)
 {
     // calculate the length of the vector
