@@ -128,20 +128,21 @@ void GLOPBaseObj::DrawPick()
     glVertexPointer(3, GL_FLOAT, 0, NULL);
     glBindBuffer(GL_ARRAY_BUFFER, normalsVBO);
     glNormalPointer(GL_FLOAT, 0, 0);
-	glColor3ub(id, id, id);
+    glColor3ub(id, id, id);
     glDrawArrays(GL_TRIANGLES, 0, faces*3);
 }
 
 
 GLOPBaseObj::GLOPBaseObj()
 {
-	_Id++;
-	id = _Id;
+    _Id++;
+    id = _Id;
+    selected = 0;
 }
 
 
 void GLOPBaseObj::MouseOver(unsigned char* pixel)
 {
-	selected = 0;
-	if (pixel[0] == id && pixel[1] == id && pixel[2] == id) { selected = 1; }
+    selected = 0;
+    if (pixel[0] == id && pixel[1] == id && pixel[2] == id) { selected = 1; }
 }

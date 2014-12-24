@@ -5,12 +5,14 @@
 #include <stdio.h>
 #include "glop_base_obj.h"
 #include "glop_hmap_terrain.h"
+#include "glop_camera_view.h"
 
 
 GLOPBaseObj* baseObj;
 GLOPBaseObj* baseObj2;
 GLOPBaseObj* baseObj3;
 GLOPHmapTerrain* terrain;
+GLOPCameraView* camera;
 
 unsigned int _cursor_pos_callback_counter = 0;
 
@@ -22,7 +24,7 @@ void draw()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(-0.5f, 0.5f, 0.5f, 10.0f, -1.0f, -10.0f, 0.0f, 1.0f, 0.0f);
+    camera->Camera();
 
     glEnableClientState(GL_VERTEX_ARRAY);
     glEnableClientState(GL_NORMAL_ARRAY);
@@ -30,25 +32,25 @@ void draw()
 
     terrain->Draw();
 
-	glPushMatrix();
+    glPushMatrix();
     glTranslatef(1.0f, 0.0f, -1.0f);
-	glScalef(0.1f, 0.1f, 0.1f);
+    glScalef(0.1f, 0.1f, 0.1f);
     baseObj->Draw();
-	glPopMatrix();
+    glPopMatrix();
 
-	glPushMatrix();
+    glPushMatrix();
     glTranslatef(2.5f, 0.0f, -3.5f);
-	glRotatef(-60.0f, 0.0f, 1.0f, 0.0f);
-	glScalef(0.1f, 0.1f, 0.1f);
+    glRotatef(-60.0f, 0.0f, 1.0f, 0.0f);
+    glScalef(0.1f, 0.1f, 0.1f);
     baseObj2->Draw();
-	glPopMatrix();
+    glPopMatrix();
 
-	glPushMatrix();
+    glPushMatrix();
     glTranslatef(0.8f, 0.0f, -1.4f);
-	glRotatef(20.0f, 0.0f, 1.0f, 0.0f);
-	glScalef(0.05f, 0.05f, 0.05f);
+    glRotatef(20.0f, 0.0f, 1.0f, 0.0f);
+    glScalef(0.05f, 0.05f, 0.05f);
     baseObj3->Draw();
-	glPopMatrix();
+    glPopMatrix();
 }
 
 
@@ -59,7 +61,7 @@ void picking_draw()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    gluLookAt(-0.5f, 0.5f, 0.5f, 10.0f, -1.0f, -10.0f, 0.0f, 1.0f, 0.0f);
+    camera->Camera();
 
 	glPushMatrix();
     glTranslatef(1.0f, 0.0f, -1.0f);
@@ -130,6 +132,10 @@ void cursor_pos_callback(GLFWwindow* window, double x, double y)
         GLint viewport[4];
         glGetIntegerv(GL_VIEWPORT, viewport);
 		glReadPixels(x, viewport[3] - y, 1, 1, GL_RGB, GL_UNSIGNED_BYTE, pixel);
+        if (x < 30)                 { camera->Rotate(1);    glfwSetCursorPos(window, 30, y); }
+        if (x > viewport[2] - 30)   { camera->Rotate(-1);   glfwSetCursorPos(window, viewport[2] - 30, y); }
+        if (y < 20)                 { camera->Move(0.4f);   glfwSetCursorPos(window, x, 20); }
+        if (y > viewport[3] - 20)   { camera->Move(-0.4f);  glfwSetCursorPos(window, x, viewport[3] - 20); }
 		baseObj->MouseOver(pixel);
 		baseObj2->MouseOver(pixel);
 		baseObj3->MouseOver(pixel);
@@ -191,6 +197,7 @@ int main(void)
     baseObj2->Load("wolf_mesh.obj");
     baseObj3 = new GLOPBaseObj();
     baseObj3->Load("wolf_mesh.obj");
+    camera = new GLOPCameraView();
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -204,8 +211,10 @@ int main(void)
     }
 
     glfwTerminate();
+    delete terrain;
     delete baseObj;
     delete baseObj2;
     delete baseObj3;
+    delete camera;
     return 0;
 }

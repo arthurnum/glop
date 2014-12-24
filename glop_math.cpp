@@ -35,3 +35,9 @@ void normal (vertex_t v1, vertex_t v2, vertex_t v3, vertex_t *normal)
     // normalize
     normalize(normal);
 }
+
+
+double dtor(int degrees)
+{
+    return degrees * PI / 180.0;
+}
