@@ -8,22 +8,34 @@
 
 unsigned int _cursor_pos_callback_counter = 0;
 GLOPCameraView* camera;
+GLuint program;
+
+
+void circle(float x, float z)
+{
+    int i;
+    double radius = 1.0; 
+    glColor3f(0.0f, 1.0f, 0.0);
+    double twicePi = 6.28318530718;
+    glUniform3f(glGetUniformLocation(program, "center"), x, 0.0f, z);
+    glBegin(GL_TRIANGLE_FAN); //BEGIN CIRCLE
+    glVertex3f(x, 0.0f, z); // center of circle
+    for (i = 0; i <= 40; i++)   {
+        glVertex3f( (x + (radius * cos(i * twicePi / 40))), 0.0f, (z + (radius * sin(i * twicePi / 40))) );
+    }
+    glEnd(); //END
+}
 
 
 void draw()
 {
-    glClearColor(0.6, 0.6, 1.0, 0.0);
+    glClearColor(0.0, 0.0, 0.0, 0.0);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
     camera->Camera();
-
-    glColor3f(1.0f, 0.0f, 0.0f);
-    glBegin(GL_TRIANGLES);
-        glVertex3f(0.0f, 0.0f, 0.0f);
-        glVertex3f(3.0f, 0.0f, 0.0f);
-        glVertex3f(2.0f, 0.0f, -1.0f);
-    glEnd();
+    circle(0.0f, 0.0f);
+    circle(1.0f, -1.0f);
 }
 
 
@@ -65,29 +77,29 @@ char* filetobuf(const char* file)
 
 void printShaderInfoLog(GLuint shader)
 {
-int infologLen = 0;
-int charsWritten = 0;
-GLchar* infoLog;
-glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infologLen);
-printf("%s\n", infoLog);
-if (infologLen > 0)
-{
-infoLog = new GLchar [infologLen];
-if (infoLog == NULL)
-{
-printf("ERROR: Could not allocate InfoLog buffer\n");
-}
-glGetShaderInfoLog(shader, infologLen, &charsWritten, infoLog);
-printf("InfoLog:\n%s\n\n", infoLog);
-delete[] infoLog;
-}
-printf("%s\n", infoLog);
+    int infologLen = 0;
+    int charsWritten = 0;
+    GLchar* infoLog;
+    glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infologLen);
+    printf("%s\n", infoLog);
+    if (infologLen > 0)
+    {
+        infoLog = new GLchar [infologLen];
+        if (infoLog == NULL)
+        {
+            printf("ERROR: Could not allocate InfoLog buffer\n");
+        }
+        glGetShaderInfoLog(shader, infologLen, &charsWritten, infoLog);
+        printf("InfoLog:\n%s\n\n", infoLog);
+        delete[] infoLog;
+    }
+    printf("%s\n", infoLog);
 }
 
 
 void init_shaders()
 {
-    GLuint vertex_shader, fragment_shader, program;
+    GLuint vertex_shader, fragment_shader;
     char* vertex_source;
     char* fragment_source;
 
