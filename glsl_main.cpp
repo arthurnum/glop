@@ -81,7 +81,6 @@ void printShaderInfoLog(GLuint shader)
     int charsWritten = 0;
     GLchar* infoLog;
     glGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infologLen);
-    printf("%s\n", infoLog);
     if (infologLen > 0)
     {
         infoLog = new GLchar [infologLen];
@@ -93,7 +92,6 @@ void printShaderInfoLog(GLuint shader)
         printf("InfoLog:\n%s\n\n", infoLog);
         delete[] infoLog;
     }
-    printf("%s\n", infoLog);
 }
 
 
